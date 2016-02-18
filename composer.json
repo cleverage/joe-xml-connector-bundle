@@ -1,0 +1,20 @@
+{
+    "name": "arii/joe-xml-connector-bundle",
+    "type": "symfony-bundle",
+    "authors": [
+        {
+            "name": "Bryan Folliot",
+            "email": "bfolliot@clever-age.com"
+        }
+    ],
+    "require": {
+        "arii/joe-bundle": "dev-services",
+        "symfony/event-dispatcher": "^2.7",
+        "symfony/config": "^2.7",
+        "symfony/filesystem": "^2.7",
+        "bfolliot/filesystem": "^1.0"
+    },
+    "autoload": {
+        "psr-4": { "Arii\\JoeXmlConnectorBundle\\": "" }
+    },
+}

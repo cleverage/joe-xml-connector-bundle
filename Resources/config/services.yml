@@ -1,0 +1,10 @@
+services:
+    arii_joe_xml_connector.job_scheduler_subscriber:
+        class: Arii\JoeXmlConnectorBundle\Subscriber\JobScheduler
+        tags:
+          - { name: kernel.event_subscriber }
+        arguments:
+          - "%arii_joe_xml_connector%"
+          - "@arii_joe.job_scheduler"
+          - "@doctrine.orm.entity_manager"
+
