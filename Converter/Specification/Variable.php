@@ -2,7 +2,7 @@
 
 namespace Arii\JoeXmlConnectorBundle\Converter\Specification;
 
-class Variable
+class Variable implements SpecificationInterface
 {
 
     public static function getXmlName()
@@ -10,7 +10,7 @@ class Variable
         return 'variable';
     }
 
-    public function getEntityName()
+    public static function getEntityName()
     {
         return 'Arii\JOEBundle\Entity\Variable';
     }

@@ -12,6 +12,15 @@ class EntityToXML
 
     public function __construct($entity, $spec)
     {
+        if (!class_exists($spec)) {
+            throw new Exception("Specification class does not exist.", 1);
+        }
+
+        $entityClassName = $spec::getEntityName();
+        if (!is_object($entity) || !$entity instanceof $entityClassName) {
+            throw new Exception('The entity is not an instance of ' . $spec::getEntityName(), 1);
+        }
+
         $this->entity   = $entity;
         $this->spec     = $spec;
         $this->document = new DOMDocument;

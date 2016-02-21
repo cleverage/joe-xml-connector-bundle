@@ -5,9 +5,9 @@
  * @author Bryan Folliot <bfolliot@clever-age.com>
  */
 
-namespace Arii\JoeXmlConnectorBundle\Converter;
+namespace Arii\JoeXmlConnectorBundle\Converter\Specification;
 
-interface SpecificationSpecInterface
+interface SpecificationInterface
 {
     public static function getXmlName();
     public static function getEntityName();

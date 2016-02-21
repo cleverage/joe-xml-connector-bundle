@@ -2,7 +2,7 @@
 
 namespace Arii\JoeXmlConnectorBundle\Converter\Specification;
 
-class Variable
+class LockUse implements SpecificationInterface
 {
 
     public static function getXmlName()
@@ -10,7 +10,7 @@ class Variable
         return 'lock.use';
     }
 
-    public function getEntityName()
+    public static function getEntityName()
     {
         return 'Arii\JOEBundle\Entity\LockUse';
     }

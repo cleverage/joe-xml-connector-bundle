@@ -4,7 +4,7 @@ namespace Arii\JoeXmlConnectorBundle\Converter\Specification;
 
 use DateTime;
 
-class Job
+class Job implements SpecificationInterface
 {
 
     public static function getXmlName()
@@ -12,7 +12,7 @@ class Job
         return 'job';
     }
 
-    public function getEntityName()
+    public static function getEntityName()
     {
         return 'Arii\JOEBundle\Entity\Job';
     }
@@ -196,20 +196,27 @@ class Job
         return array(
             array(
                 'entityProperty' => 'description',
-                'xmlGroup'       => 'description',
-                'xmlElement'     => 'include',
                 'spec'           => IncludeFile::class,
+                'xmlElement'     => 'include',
+                'xmlGroup'       => 'description',
             ),
             array(
-                'entityProperty' => 'environmentVariables',
-                'xmlGroup'       => 'environment',
-                'xmlElement'     => 'variable',
-                'spec'           => Variable::class,
+                'entityCollectionAddMethode' => 'addEnvironmentVariable',
+                'entityProperty'             => 'environmentVariables',
+                'spec'                       => Variable::class,
+                'xmlElement'                 => 'variable',
+                'xmlGroup'                   => 'environment',
             ),
             array(
-                'entityProperty' => 'lockUses',
-                'xmlElement'     => 'lock.use',
-                'spec'           => LockUse::class,
+                'entityCollectionAddMethode' => 'addLockUse',
+                'entityProperty'             => 'lockUses',
+                'spec'                       => LockUse::class,
+                'xmlElement'                 => 'lock.use',
+            ),
+            array(
+                'entityProperty' => 'script',
+                'spec'           => Script::class,
+                'xmlElement'     => 'script',
             ),
         );
     }

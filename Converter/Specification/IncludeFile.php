@@ -2,7 +2,7 @@
 
 namespace Arii\JoeXmlConnectorBundle\Converter\Specification;
 
-class IncludeFile
+class IncludeFile implements SpecificationInterface
 {
 
     public static function getXmlName()
@@ -10,7 +10,7 @@ class IncludeFile
         return 'include';
     }
 
-    public function getEntityName()
+    public static function getEntityName()
     {
         return 'Arii\JOEBundle\Entity\IncludeFile';
     }
