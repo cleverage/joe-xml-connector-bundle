@@ -3,6 +3,7 @@
 namespace Arii\JoeXmlConnectorBundle\Converter;
 
 use DOMDocument;
+use Doctrine\Common\Collections\ArrayCollection;
 
 class EntityToXML
 {
@@ -21,11 +22,12 @@ class EntityToXML
             throw new Exception('The entity is not an instance of ' . $spec::getEntityName(), 1);
         }
 
-        $this->entity   = $entity;
-        $this->spec     = $spec;
-        $this->document = new DOMDocument;
+        $this->entity = $entity;
+        $this->spec   = $spec;
+
+        $this->document                     = new DOMDocument('1.0', mb_internal_encoding());
         $this->document->preserveWhiteSpace = false;
-        $this->document->formatOutput = true;
+        $this->document->formatOutput       = true;
     }
 
     public function toXML()
@@ -41,6 +43,7 @@ class EntityToXML
 
     protected function createElement($entity, $spec)
     {
+
         $element = $this->document->createElement($spec::getXmlName());
 
         foreach ($spec::getAttributes() as $attributeSpec) {
@@ -50,10 +53,16 @@ class EntityToXML
             } else {
                 $value = false;
             }
-            if (!empty($value)) {
+
+            if (!empty($value) || $value === false || $value === 0) {
                 if (!empty($attributeSpec['filterToXml']) && is_callable($attributeSpec['filterToXml'])) {
                     $value = $attributeSpec['filterToXml']($value);
                 }
+
+                if (isset($attributeSpec['default']) && $value == $attributeSpec['default']) {
+                    continue;
+                }
+
                 $element->setAttribute(
                     $attributeSpec['xmlName'],
                     $value
@@ -68,28 +77,30 @@ class EntityToXML
             } else {
                 $value = false;
             }
-            if (!empty($value)) {
-                if (!empty($childSpec['xmlGroup'])) {
-                    $parent = $this->document->createElement($childSpec['xmlGroup']);
-                } else {
-                    $parent = $element;
-                }
 
-                if (is_array($value)) {
-                    foreach ($value as $childValue) {
-                        $parent->appendChild(
-                            $this->createElement($childValue, $childSpec['spec'])
-                        );
-                    }
-                } else {
+            if (empty($value)) {
+                continue;
+            }
+            if (!empty($childSpec['xmlGroup'])) {
+                $parent = $this->document->createElement($childSpec['xmlGroup']);
+            } else {
+                $parent = $element;
+            }
+
+            if (is_array($value) || $value instanceof ArrayCollection) {
+                foreach ($value as $childValue) {
                     $parent->appendChild(
-                        $this->createElement($value, $childSpec['spec'])
+                        $this->createElement($childValue, $childSpec['spec'])
                     );
                 }
+            } else {
+                $parent->appendChild(
+                    $this->createElement($value, $childSpec['spec'])
+                );
+            }
 
-                if (!empty($childSpec['xmlGroup'])) {
-                    $element->appendChild($parent);
-                }
+            if (!empty($childSpec['xmlGroup'])) {
+                $element->appendChild($parent);
             }
         }
 

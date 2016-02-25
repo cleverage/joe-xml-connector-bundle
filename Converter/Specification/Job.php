@@ -2,6 +2,7 @@
 
 namespace Arii\JoeXmlConnectorBundle\Converter\Specification;
 
+use BFolliot\Date\DateInterval;
 use DateTime;
 
 class Job implements SpecificationInterface
@@ -50,10 +51,12 @@ class Job implements SpecificationInterface
             array(
                 'entityProperty' => 'tasks',
                 'xmlName'        => 'tasks',
+                'default'        => 1,
             ),
             array(
                 'entityProperty' => 'minTasks',
                 'xmlName'        => 'min_tasks',
+                'default'        => 0,
             ),
             array(
                 'entityProperty' => 'timeout',
@@ -62,8 +65,26 @@ class Job implements SpecificationInterface
                     return $value->format('%s');
                 },
                 'filterToEntity' => function ($value) {
-                    throw new \Exception("TODO", 1);
+                    $value = explode(':', $value);
+                    $return = 'PT';
+                    switch (count($value)) {
+                        case 1:
+                            $return .= $value[0] . 'S';
+                            break;
+                        case 2:
+                            $return .= $value[0] . 'M' . $value[1] . 'S';
+                            break;
+                        case 3:
+                            $return .= $value[0] . 'H' . $value[1] . 'M' . $value[2] . 'S';
+                            break;
+
+                        default:
+                            throw new \Exception("Bad Format for timeout");
+                            break;
+                    }
+                    return new DateInterval($return);
                 },
+                'default' => 0,
             ),
             array(
                 'entityProperty' => 'idleTimeout',
@@ -72,8 +93,26 @@ class Job implements SpecificationInterface
                     return $value->format('%s');
                 },
                 'filterToEntity' => function ($value) {
-                    throw new \Exception("TODO", 1);
+                    $value = explode(':', $value);
+                    $return = 'PT';
+                    switch (count($value)) {
+                        case 1:
+                            $return .= $value[0] . 'S';
+                            break;
+                        case 2:
+                            $return .= $value[0] . 'M' . $value[1] . 'S';
+                            break;
+                        case 3:
+                            $return .= $value[0] . 'H' . $value[1] . 'M' . $value[2] . 'S';
+                            break;
+
+                        default:
+                            throw new \Exception("Bad Format for idle_timeout");
+                            break;
+                    }
+                    return new DateInterval($return);
                 },
+                'default' => 5,
             ),
             array(
                 'entityProperty' => 'forceIdleTimeout',
@@ -84,6 +123,7 @@ class Job implements SpecificationInterface
                 'filterToEntity' => function ($value) {
                     return $value == 'yes';
                 },
+                'default' => 'no',
             ),
             array(
                 'entityProperty' => 'priority',
@@ -98,6 +138,7 @@ class Job implements SpecificationInterface
                 'filterToEntity' => function ($value) {
                     return $value == 'yes';
                 },
+                'default' => 'no',
             ),
             array(
                 'entityProperty' => 'javaOptions',
@@ -122,6 +163,7 @@ class Job implements SpecificationInterface
                     }
                     return 0;
                 },
+                'default' => 'yes',
             ),
             array(
                 'entityProperty' => 'ignoreSignals',
@@ -132,6 +174,7 @@ class Job implements SpecificationInterface
                 'filterToEntity' => function ($value) {
                     return explode(' ', $value);
                 },
+                'default' => 'all',
             ),
             array(
                 'entityProperty' => 'stopOnError',
@@ -142,6 +185,7 @@ class Job implements SpecificationInterface
                 'filterToEntity' => function ($value) {
                     return $value == 'yes';
                 },
+                'default' => 'yes',
             ),
             array(
                 'entityProperty' => 'replace',
@@ -152,6 +196,7 @@ class Job implements SpecificationInterface
                 'filterToEntity' => function ($value) {
                     return $value == 'yes';
                 },
+                'default' => 'yes',
             ),
             array(
                 'entityProperty' => 'warnIfShorterThan',
@@ -186,6 +231,7 @@ class Job implements SpecificationInterface
                 'filterToEntity' => function ($value) {
                     return $value == 'yes';
                 },
+                'default' => 'yes',
             ),
 
         );
@@ -201,6 +247,12 @@ class Job implements SpecificationInterface
                 'xmlGroup'       => 'description',
             ),
             array(
+                'entityCollectionAddMethode' => 'addLockUse',
+                'entityProperty'             => 'lockUses',
+                'spec'                       => LockUse::class,
+                'xmlElement'                 => 'lock.use',
+            ),
+            array(
                 'entityCollectionAddMethode' => 'addEnvironmentVariable',
                 'entityProperty'             => 'environmentVariables',
                 'spec'                       => Variable::class,
@@ -208,15 +260,48 @@ class Job implements SpecificationInterface
                 'xmlGroup'                   => 'environment',
             ),
             array(
-                'entityCollectionAddMethode' => 'addLockUse',
-                'entityProperty'             => 'lockUses',
-                'spec'                       => LockUse::class,
-                'xmlElement'                 => 'lock.use',
+                'entityProperty' => 'params',
+                'spec'           => Params::class,
+                'xmlElement'     => 'params',
             ),
             array(
                 'entityProperty' => 'script',
                 'spec'           => Script::class,
                 'xmlElement'     => 'script',
+            ),
+            array(
+                'entityProperty' => 'monitor',
+                'spec'           => Monitor::class,
+                'xmlElement'     => 'monitor',
+            ),
+            array(
+                'entityCollectionAddMethode' => 'addStartWhenDirectoryChanged',
+                'entityProperty'             => 'startWhenDirectoryChanged',
+                'spec'                       => StartWhenDirectoryChanged::class,
+                'xmlElement'                 => 'start_when_directory_changed',
+            ),
+            array(
+                'entityCollectionAddMethode' => 'addDelayAfterError',
+                'entityProperty'             => 'delayAfterError',
+                'spec'                       => DelayAfterError::class,
+                'xmlElement'                 => 'delay_after_error',
+            ),
+            array(
+                'entityCollectionAddMethode' => 'addDelayOrderAfterSetBack',
+                'entityProperty'             => 'delayOrderAfterSetBack',
+                'spec'                       => DelayOrderAfterSetBack::class,
+                'xmlElement'                 => 'delay_order_after_setback',
+            ),
+            array(
+                'entityProperty' => 'runTime',
+                'spec'           => RunTime::class,
+                'xmlElement'     => 'run_time',
+            ),
+            array(
+                'entityCollectionAddMethode' => 'addCommands',
+                'entityProperty'             => 'commandsCollection',
+                'spec'                       => Commands::class,
+                'xmlElement'                 => 'commands',
             ),
         );
     }

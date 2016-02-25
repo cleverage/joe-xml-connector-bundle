@@ -5,6 +5,7 @@ namespace Arii\JoeXmlConnectorBundle\Converter;
 use DOMDocument;
 use DOMNode;
 use Exception;
+use Arii\JoeXmlConnectorBundle\Converter\Exception\NoResultException;
 
 class XMLToEntity
 {
@@ -26,7 +27,7 @@ class XMLToEntity
         }
 
         if (!class_exists($spec)) {
-            throw new Exception("Specification class does not exist.");
+            throw new Exception(sprintf('Converter Specification %s does not exist', $childSpec['spec']));
         }
 
         if ($this->xml->nodeName == '#document') {
@@ -44,6 +45,13 @@ class XMLToEntity
         return $this;
     }
 
+    /**
+     * Convert XML to Entity
+     *
+     * @throw NoResultException
+     *
+     * @return "Entity"
+     */
     public function toEntity()
     {
         return $this->createEntity(
@@ -52,9 +60,20 @@ class XMLToEntity
         );
     }
 
+    /**
+     * Convert XML to Entity
+     *
+     * @param DOMNode $element
+     * @param string $spec Class Name of converter spec.
+     *
+     * @throw NoResultException
+     *
+     * @return "Entity"
+     */
     protected function createEntity($element, $spec)
     {
         $entityName = $spec::getEntityName();
+
         $entity     = new $entityName;
 
         foreach ($spec::getAttributes() as $attributeSpec) {
@@ -70,52 +89,61 @@ class XMLToEntity
             }
             if (!empty($value)) {
                 if (!empty($attributeSpec['filterToEntity']) && is_callable($attributeSpec['filterToEntity'])) {
-                    $value = $attributeSpec['filterToEntity']($value);
+                    try {
+                        $value = $attributeSpec['filterToEntity']($value);
+                    } catch (NoResultException $e) {
+                        continue;
+                    }
                 }
                 $entity->$methode($value);
             }
         }
 
+        if ($element->hasChildNodes()) {
+            foreach ($spec::getChildren() as $childSpec) {
+                if (!class_exists($childSpec['spec'])) {
+                    throw new Exception(sprintf('Converter Specification %s does not exist', $childSpec['spec']));
+                }
+                if (!empty($childSpec['xmlGroup'])) {
+                    $group = $element->getElementsByTagName($childSpec['xmlGroup']);
+                    if ($group->length == 0) {
+                        continue;
+                    }
 
-        if (!$element->hasChildNodes()) {
-            return $entity;
-        }
+                    $childElements = $group->item(0)->getElementsByTagName($childSpec['xmlElement']);
+                } else {
+                    $childElements = $element->getElementsByTagName($childSpec['xmlElement']);
+                }
 
-        foreach ($spec::getChildren() as $childSpec) {
-            if (!empty($childSpec['xmlGroup'])) {
-                $group = $element->getElementsByTagName($childSpec['xmlGroup']);
-                if ($group->length == 0) {
+                if ($childElements->length == 0) {
                     continue;
                 }
 
-                $childElements = $group->item(0)->getElementsByTagName($childSpec['xmlElement']);
-            } else {
-                $childElements = $element->getElementsByTagName($childSpec['xmlElement']);
-            }
+                if (!empty($childSpec['entityCollectionAddMethode'])) {
+                    $methode = $childSpec['entityCollectionAddMethode'];
+                } else {
+                    $methode = 'set' . ucfirst($childSpec['entityProperty']);
+                }
 
-            if ($childElements->length == 0) {
-                continue;
-            }
-
-
-
-            if (!empty($childSpec['entityCollectionAddMethode'])) {
-                $methode = $childSpec['entityCollectionAddMethode'];
-            } else {
-                $methode = 'set' . ucfirst($childSpec['entityProperty']);
-            }
-
-
-            if (!method_exists($entity, $methode)) {
-                continue;
-            }
-
-            foreach ($childElements as $childElement) {
-                $entity->$methode(
-                    $this->createEntity($childElement, $childSpec['spec'])
-                );
+                if (!method_exists($entity, $methode)) {
+                    continue;
+                }
+                foreach ($childElements as $childElement) {
+                    try {
+                        $entity->$methode(
+                            $this->createEntity($childElement, $childSpec['spec'])
+                        );
+                    } catch (NoResultException $e) {
+                        continue;
+                    }
+                }
             }
         }
+
+        if ($entity == new $entityName) {
+            throw new NoResultException;
+        }
+
         return $entity;
     }
 }
