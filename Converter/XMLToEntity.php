@@ -27,7 +27,7 @@ class XMLToEntity
         }
 
         if (!class_exists($spec)) {
-            throw new Exception(sprintf('Converter Specification %s does not exist', $childSpec['spec']));
+            throw new Exception(sprintf('Converter Specification %s does not exist', $spec));
         }
 
         if ($this->xml->nodeName == '#document') {
@@ -77,11 +77,24 @@ class XMLToEntity
         $entity     = new $entityName;
 
         foreach ($spec::getAttributes() as $attributeSpec) {
-
-            if (!$element->hasAttribute($attributeSpec['xmlName'])) {
-                continue;
+            unset($value);
+            if (!empty($attributeSpec['xmlChildElement'])) {
+                $childElements = $element->getElementsByTagName($attributeSpec['xmlChildElement']);
+                if ($childElements->length == 0) {
+                    continue;
+                }
+                if (!$childElements->item(0)->hasAttribute($attributeSpec['xmlName'])) {
+                    continue;
+                }
+                $value = $childElements->item(0)->getAttribute($attributeSpec['xmlName']);
             }
-            $value = $element->getAttribute($attributeSpec['xmlName']);
+
+            if (empty($value)) {
+                if (!$element->hasAttribute($attributeSpec['xmlName'])) {
+                    continue;
+                }
+                $value = $element->getAttribute($attributeSpec['xmlName']);
+            }
 
             $methode = 'set' . ucfirst($attributeSpec['entityProperty']);
             if (!method_exists($entity, $methode)) {

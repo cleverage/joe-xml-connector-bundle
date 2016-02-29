@@ -63,10 +63,19 @@ class EntityToXML
                     continue;
                 }
 
-                $element->setAttribute(
-                    $attributeSpec['xmlName'],
-                    $value
-                );
+                if (!empty($attributeSpec['xmlChildElement'])) {
+                    $xmlChildElement = $this->document->createElement($childSpec['xmlChildElement']);
+                    $xmlChildElement->setAttribute(
+                        $attributeSpec['xmlName'],
+                        $value
+                    );
+                    $element->appendChild($xmlChildElement);
+                } else {
+                    $element->setAttribute(
+                        $attributeSpec['xmlName'],
+                        $value
+                    );
+                }
             }
         }
 
