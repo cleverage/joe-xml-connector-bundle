@@ -142,6 +142,9 @@ class XMLToEntity
                     continue;
                 }
                 foreach ($childElements as $childElement) {
+                    if ($childElement->parentNode->nodeName != $element->nodeName && empty($childSpec['xmlGroup'])) {
+                        continue;
+                    }
                     try {
                         $entity->$methode(
                             $this->createEntity($childElement, $childSpec['spec'])
