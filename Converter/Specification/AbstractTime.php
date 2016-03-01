@@ -22,12 +22,15 @@ abstract class AbstractTime implements SpecificationInterface
                         : '';
                 },
                 'filterToEntity' => function ($value) {
-                    if (!empty($value)) {
+                    if (empty($value)) {
                         throw new NoResultException;
                     }
                     $dateTime = DateTime::createFromFormat('h:m:s', $value);
                     if (!$dateTime) {
-                        throw new NoResultException;
+                        $dateTime = DateTime::createFromFormat('h:m', $value);
+                        if (!$dateTime) {
+                            throw new NoResultException;
+                        }
                     }
                     return $dateTime;
                 },
@@ -41,12 +44,15 @@ abstract class AbstractTime implements SpecificationInterface
                         : '';
                 },
                 'filterToEntity' => function ($value) {
-                    if (!empty($value)) {
+                    if (empty($value)) {
                         throw new NoResultException;
                     }
                     $dateTime = DateTime::createFromFormat('h:m:s', $value);
                     if (!$dateTime) {
-                        throw new NoResultException;
+                        $dateTime = DateTime::createFromFormat('h:m', $value);
+                        if (!$dateTime) {
+                            throw new NoResultException;
+                        }
                     }
                     return $dateTime;
                 },
@@ -71,12 +77,15 @@ abstract class AbstractTime implements SpecificationInterface
                         : '';
                 },
                 'filterToEntity' => function ($value) {
-                    if (!empty($value)) {
+                    if (empty($value)) {
                         throw new NoResultException;
                     }
                     $dateTime = DateTime::createFromFormat('h:m:s', $value);
                     if (!$dateTime) {
-                        throw new NoResultException;
+                        $dateTime = DateTime::createFromFormat('h:m', $value);
+                        if (!$dateTime) {
+                            throw new NoResultException;
+                        }
                     }
                     return $dateTime;
                 },
