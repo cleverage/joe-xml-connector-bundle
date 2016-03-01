@@ -26,7 +26,9 @@ class DelayAfterError implements SpecificationInterface
                 'entityProperty' => 'delay',
                 'xmlName'        => 'delay',
                 'filterToXml' => function ($value) {
-                    return $value->format('%s');
+                    if (!empty($value)) {
+                        return $value->format('%s');
+                    }
                 },
                 'filterToEntity' => function ($value) {
                     $value = explode(':', $value);

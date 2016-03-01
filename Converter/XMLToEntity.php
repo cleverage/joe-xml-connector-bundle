@@ -72,6 +72,10 @@ class XMLToEntity
      */
     protected function createEntity($element, $spec)
     {
+        if (!$element->hasAttributes() && !$element->hasChildNodes()) {
+            throw new NoResultException;
+        }
+
         $entityName = $spec::getEntityName();
 
         $entity     = new $entityName;

@@ -102,13 +102,16 @@ class JobScheduler implements EventSubscriberInterface
      */
     public function onCollectionFetch(EventCollection $event)
     {
-        $inDB = array();
+        $inDB   = array();
         $output = $event->getOutput();
-        foreach ($output as $jobScheduler) {
-            $inDB[] = $jobScheduler->getName();
-            $path          = $this->getFolderPath($jobScheduler->getName());
-            if (!$this->fs->exists($path)) {
-                $this->fs->mkdir($path, 0700);
+
+        if (!empty($output)) {
+            foreach ($output as $jobScheduler) {
+                $inDB[] = $jobScheduler->getName();
+                $path          = $this->getFolderPath($jobScheduler->getName());
+                if (!$this->fs->exists($path)) {
+                    $this->fs->mkdir($path, 0700);
+                }
             }
         }
 
@@ -129,6 +132,9 @@ class JobScheduler implements EventSubscriberInterface
             if ($return->getStatus() == PayloadStatus::CREATED) {
                 $output[] = $return->getOutput();
             }
+        }
+        if ($event->getStatus() == PayloadStatus::NOT_FOUND && !empty($output)) {
+            $event->setStatus(PayloadStatus::FOUND);
         }
         $event->setOutput($output);
     }
