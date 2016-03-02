@@ -3,4 +3,4 @@
 Synchronisation XML-DB
 Require: JOEBundle
 
-* [Documentation source file](doc/)
+* [Documentation source file](Resources/doc/)
